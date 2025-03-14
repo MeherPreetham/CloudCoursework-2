@@ -2,12 +2,14 @@ import azure.functions as func
 import logging
 import json
 
+@app.route(route="fitnessTrigger", auth_level="anonymous")
 def fitnessTrigger(req: func.HttpRequest) -> func.HttpResponse:
     logging.info('Python HTTP trigger function processed a request.')
 
     try:
         # Parse the request body
         req_body = req.get_json()
+        logging.info(f"Received request body: {req_body}")
 
         # Extract parameters
         task_times = req_body.get('task_times')
@@ -49,14 +51,17 @@ def fitnessTrigger(req: func.HttpRequest) -> func.HttpResponse:
         total_time = max(core_times)
         fitness = 1 / total_time
 
+        response_body = {
+            "message": "Fitness calculated successfully",
+            "core_times": core_times,
+            "total_time": total_time,
+            "fitness": fitness
+        }
+        logging.info(f"Response body: {response_body}")
+
         # Return JSON response
         return func.HttpResponse(
-            json.dumps({
-                "message": "Fitness calculated successfully",
-                "core_times": core_times,
-                "total_time": total_time,
-                "fitness": fitness
-            }),
+            json.dumps(response_body),
             status_code=200,
             mimetype="application/json"
         )
